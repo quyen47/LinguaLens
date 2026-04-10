@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinguaLens — Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <div class="sidebar-logo-icon">L</div>
+          <div class="sidebar-logo-text">
+            <span class="sidebar-brand">LinguaLens</span>
+            <span class="sidebar-version">v1.0.0</span>
+          </div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-section="api" id="nav-api">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span>API Configuration</span>
+        </button>
+        <button class="nav-item" data-section="prompts" id="nav-prompts">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <span>Prompt Templates</span>
+        </button>
+        <button class="nav-item" data-section="vocabulary" id="nav-vocabulary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <span>My Vocabulary</span>
+        </button>
+        <button class="nav-item" data-section="about" id="nav-about">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <span>About</span>
+        </button>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main" id="main-content">
+
+      <!-- API Configuration Section -->
+      <section class="section active" id="section-api">
+        <div class="section-header">
+          <h1 class="section-title">API Configuration</h1>
+          <p class="section-desc">Configure your AI provider to power translation, grammar analysis, and all language features.</p>
+        </div>
+        <div class="cards">
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">AI Provider</h2>
+              <span class="card-badge" id="api-status-badge">Not Connected</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="api-provider">Provider</label>
+              <select class="form-select" id="api-provider">
+                <option value="openai">OpenAI</option>
+                <option value="deepseek">DeepSeek</option>
+                <option value="gemini">Google Gemini</option>
+                <option value="custom">Custom (OpenAI-compatible)</option>
+              </select>
+            </div>
+            <div class="form-group" id="api-endpoint-group">
+              <label class="form-label" for="api-endpoint">API Endpoint</label>
+              <input class="form-input" type="url" id="api-endpoint" placeholder="https://api.openai.com/v1/chat/completions">
+              <span class="form-hint">Custom endpoint for OpenAI-compatible APIs (Groq, Together, Ollama, etc.)</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="api-key">API Key</label>
+              <div class="form-input-wrapper">
+                <input class="form-input" type="password" id="api-key" placeholder="sk-... or AIza...">
+                <button class="form-input-toggle" id="api-key-toggle" title="Show/Hide" type="button">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="api-model">Model</label>
+              <select class="form-select" id="api-model">
+                <!-- Populated dynamically based on provider -->
+              </select>
+              <span class="form-hint" id="model-hint">Select a model for the chosen provider</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="target-lang">Default Target Language</label>
+              <select class="form-select" id="target-lang">
+                <option value="English">English</option>
+                <option value="Vietnamese">Vietnamese</option>
+                <option value="Chinese">Chinese</option>
+                <option value="Japanese">Japanese</option>
+                <option value="Korean">Korean</option>
+                <option value="French">French</option>
+                <option value="German">German</option>
+                <option value="Spanish">Spanish</option>
+                <option value="Italian">Italian</option>
+                <option value="Portuguese">Portuguese</option>
+                <option value="Russian">Russian</option>
+                <option value="Arabic">Arabic</option>
+                <option value="Hindi">Hindi</option>
+                <option value="Thai">Thai</option>
+                <option value="Indonesian">Indonesian</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="activation-mode">When I select a word or phrase</label>
+              <select class="form-select" id="activation-mode">
+                <option value="immediate_popup">Immediately display popup</option>
+                <option value="icon_popup">Display icon to show popup</option>
+                <option value="sidebar">Display in the left sidebar</option>
+                <option value="icon_sidebar">Display icon to show in sidebar</option>
+              </select>
+            </div>
+            <div class="card-actions">
+              <button class="btn btn-primary" id="btn-test-api">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Test Connection
+              </button>
+              <button class="btn btn-secondary" id="btn-save-api">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Save Settings
+              </button>
+            </div>
+            <div class="form-message" id="api-message"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Prompt Templates Section -->
+      <section class="section" id="section-prompts">
+        <div class="section-header">
+          <h1 class="section-title">Prompt Templates</h1>
+          <p class="section-desc">Customize the AI prompts for each feature. Use <code>{text}</code> as placeholder for the selected text and <code>{targetLang}</code> for the target language.</p>
+        </div>
+        <div class="cards" id="prompts-container">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- Vocabulary Section -->
+      <section class="section" id="section-vocabulary">
+        <div class="section-header">
+          <div class="section-header-row">
+            <div>
+              <h1 class="section-title">My Vocabulary</h1>
+              <p class="section-desc">Words and phrases you've saved while browsing. <span id="vocab-count">0</span> items.</p>
+            </div>
+            <div class="section-header-actions">
+              <button class="btn btn-secondary btn-sm" id="btn-export-vocab">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export JSON
+              </button>
+              <button class="btn btn-secondary btn-sm" id="btn-export-csv">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                Export CSV
+              </button>
+              <button class="btn btn-danger btn-sm" id="btn-clear-vocab">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                Clear All
+              </button>
+            </div>
+          </div>
+          <div class="search-bar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="search-input" type="text" id="vocab-search" placeholder="Search vocabulary...">
+          </div>
+        </div>
+        <div class="vocab-list" id="vocab-list">
+          <!-- Populated by JS -->
+        </div>
+        <div class="vocab-empty" id="vocab-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <p>No vocabulary saved yet.</p>
+          <span>Select text on any webpage and click "Save Vocab" to start building your vocabulary.</span>
+        </div>
+      </section>
+
+      <!-- About Section -->
+      <section class="section" id="section-about">
+        <div class="section-header">
+          <h1 class="section-title">About LinguaLens</h1>
+          <p class="section-desc">Your AI-powered language companion for the web.</p>
+        </div>
+        <div class="cards">
+          <div class="card about-card">
+            <div class="about-logo">
+              <div class="about-logo-icon">L</div>
+              <div>
+                <h2 class="about-name">LinguaLens</h2>
+                <span class="about-ver">Version 1.0.0</span>
+              </div>
+            </div>
+            <p class="about-text">
+              LinguaLens is a powerful Chrome extension that brings AI-powered language tools to your fingertips. 
+              Simply select any text on a webpage to instantly translate, analyze grammar, detect phrases, 
+              rewrite content, and much more.
+            </p>
+            <div class="about-features">
+              <h3>Features</h3>
+              <ul>
+                <li>🌐 <strong>Translate</strong> — Instant translation to 15+ languages</li>
+                <li>🔍 <strong>Detect Phrase</strong> — Identify idioms, phrasal verbs, and collocations</li>
+                <li>💡 <strong>Insight</strong> — Deep linguistic analysis with etymology and usage</li>
+                <li>✏️ <strong>Rewrite</strong> — Get formal, casual, and concise alternatives</li>
+                <li>📝 <strong>Grammar</strong> — Check and fix grammar issues</li>
+                <li>📋 <strong>Summaries</strong> — Condense long text into key points</li>
+                <li>💭 <strong>Detect Idea Template</strong> — Identify rhetorical patterns</li>
+                <li>🔤 <strong>Detect Sentence Template</strong> — Analyze sentence structure</li>
+                <li>📖 <strong>Save to Vocabulary</strong> — Build your personal word bank</li>
+              </ul>
+            </div>
+            <div class="about-credits">
+              <p>Built with ❤️ for language learners and writers everywhere.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="settings.js"></script>
+</body>
+</html>
