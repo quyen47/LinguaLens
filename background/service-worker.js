@@ -161,6 +161,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
+  if (message.type === 'OPEN_BROWSER_SIDEBAR') {
+    chrome.storage.session.set({ 
+      panelSelectedText: message.text,
+      panelContext: message.context,
+      panelUrl: message.url,
+      panelTitle: message.title
+    }, () => {
+      chrome.sidePanel.open({ windowId: sender.tab.windowId });
+      sendResponse({ success: true });
+    });
+    return true;
+  }
+
   if (message.type === 'GET_SETTINGS') {
     getSettings().then(sendResponse);
     return true;

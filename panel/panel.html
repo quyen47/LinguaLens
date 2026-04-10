@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../content/content.css">
+  <style>
+    /* Reset side panel environment to fit the container */
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #0f121e;
+      color: #e2e8f0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    .ll-popup {
+      position: static !important;
+      width: 100% !important;
+      height: 100vh !important;
+      max-height: none !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      transform: none !important;
+      opacity: 1 !important;
+    }
+    /* Hide the close button in sidebar since Chrome has its own */
+    #ll-btn-close {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="panel.js"></script>
+</body>
+</html>

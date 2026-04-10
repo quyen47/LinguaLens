@@ -5,7 +5,8 @@
   "description": "Select any text to instantly translate, analyze grammar, rewrite, detect patterns, and more — powered by AI.",
   "permissions": [
     "activeTab",
-    "storage"
+    "storage",
+    "sidePanel"
   ],
   "icons": {
     "16": "icons/icon16.png",
@@ -24,6 +25,9 @@
     }
   ],
   "options_page": "settings/settings.html",
+  "side_panel": {
+    "default_path": "panel/panel.html"
+  },
   "action": {
     "default_icon": {
       "16": "icons/icon16.png",

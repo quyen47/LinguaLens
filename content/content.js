@@ -489,7 +489,17 @@
       e.stopPropagation();
       e.preventDefault();
       hideTriggerIcon();
-      showPopup(rect, targetMode);
+      if (targetMode === 'browser_sidebar') {
+        chrome.runtime.sendMessage({ 
+          type: 'OPEN_BROWSER_SIDEBAR', 
+          text: selectedText,
+          context: getContextSentence(),
+          url: window.location.href,
+          title: document.title
+        });
+      } else {
+        showPopup(rect, targetMode);
+      }
     });
 
     shadowRoot.appendChild(iconEl);
@@ -533,6 +543,8 @@
             showTriggerIcon(rect, 'popup');
           } else if (mode === 'icon_sidebar') {
             showTriggerIcon(rect, 'sidebar');
+          } else if (mode === 'icon_browser_sidebar') {
+            showTriggerIcon(rect, 'browser_sidebar');
           } else if (mode === 'sidebar') {
             showPopup(rect, 'sidebar');
           } else {
