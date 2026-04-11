@@ -376,7 +376,16 @@
   color: var(--ll-primary);
 }
 
-.ll-result-copy {
+.ll-result-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ll-result-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 10px;
   padding: 3px 8px;
   border: 1px solid var(--ll-border);
@@ -387,9 +396,41 @@
   transition: all 0.15s ease;
 }
 
-.ll-result-copy:hover {
+.ll-result-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+.ll-result-btn:hover {
   background: var(--ll-surface);
   color: var(--ll-text);
+  border-color: var(--ll-primary);
+}
+
+.ll-inline-save-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  padding: 2px 6px;
+  margin-left: 8px;
+  border: 1px solid var(--ll-border);
+  background: var(--ll-surface);
+  border-radius: 4px;
+  color: var(--ll-text-dim);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  vertical-align: middle;
+}
+
+.ll-inline-save-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+.ll-inline-save-btn:hover {
+  background: rgba(79, 142, 247, 0.12);
+  color: var(--ll-primary);
   border-color: var(--ll-primary);
 }
 

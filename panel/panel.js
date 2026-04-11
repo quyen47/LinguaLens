@@ -39,6 +39,7 @@
   let currentTargetLang = 'English';
   let activeFeature = null;
   let panelData = { text: '', context: '', url: '', title: '' };
+  let currentAiResult = '';
 
   function buildPopup() {
     const root = document.getElementById('root');
@@ -88,7 +89,10 @@
         <div class="ll-result" id="ll-result">
           <div class="ll-result-header">
             <span class="ll-result-title" id="ll-result-title"></span>
-            <button class="ll-result-copy" id="ll-result-copy" title="Copy result">Copy</button>
+            <div class="ll-result-header-actions">
+              <button class="ll-result-btn" id="ll-result-save-analysis" title="Save this pattern/phrase to Vocabulary" style="display:none">${ICONS.save} Save</button>
+              <button class="ll-result-btn" id="ll-result-copy" title="Copy result">Copy</button>
+            </div>
           </div>
           <div class="ll-result-content" id="ll-result-content"></div>
         </div>
@@ -129,6 +133,39 @@
         setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
       });
     });
+
+    // Delegate inline save buttons
+    root.addEventListener('click', (e) => {
+      const inlineBtn = e.target.closest('.ll-inline-save-btn');
+      if (inlineBtn) {
+        e.stopPropagation();
+        const originalText = inlineBtn.innerHTML;
+        inlineBtn.innerHTML = ICONS.check + ' Saving...';
+        
+        let specificContext = currentAiResult;
+        const blockSplit = currentAiResult.split(/(?=^(?:\*\*?)?\d+\.(?:\*\*?)?\s)/m);
+        const word = inlineBtn.dataset.word;
+        const targetBlock = blockSplit.find(b => b.includes(word));
+        if (targetBlock) specificContext = targetBlock.trim();
+
+        chrome.runtime.sendMessage({
+          type: 'SAVE_VOCABULARY',
+          data: {
+            word: word,
+            context: specificContext,
+            url: panelData.url,
+            title: panelData.title
+          }
+        }, (res) => {
+          if (chrome.runtime.lastError || (res && res.error)) {
+             inlineBtn.innerHTML = ICONS.warning + ' Error';
+          } else {
+             inlineBtn.innerHTML = ICONS.check + ' Saved!';
+             setTimeout(() => { inlineBtn.innerHTML = originalText; }, 2000);
+          }
+        });
+      }
+    });
   }
 
   function triggerFastTranslate(root) {
@@ -165,7 +202,7 @@
 
     if (feature === 'save') {
       resultTitle.textContent = 'Save to Vocabulary';
-      resultCopy.style.display = 'none';
+      resultCopy.closest('.ll-result-header-actions').style.display = 'none';
       resultContent.innerHTML = '<div class="ll-loading"><div class="ll-loading-dots"><span class="ll-loading-dot"></span><span class="ll-loading-dot"></span><span class="ll-loading-dot"></span></div><span class="ll-loading-text">Saving...</span></div>';
 
       try {
@@ -197,7 +234,11 @@
 
     const featureLabel = FEATURES.find(f => f.id === feature)?.label || feature;
     resultTitle.textContent = featureLabel;
-    resultCopy.style.display = '';
+    
+    resultCopy.closest('.ll-result-header-actions').style.display = 'flex';
+    
+    const saveAnalysisBtn = root.querySelector('#ll-result-save-analysis');
+    saveAnalysisBtn.style.display = 'none'; // Replaced by inline buttons
 
     resultContent.innerHTML = '<div class="ll-loading"><div class="ll-loading-dots"><span class="ll-loading-dot"></span><span class="ll-loading-dot"></span><span class="ll-loading-dot"></span></div><span class="ll-loading-text">Analyzing with AI...</span></div>';
 
@@ -219,7 +260,8 @@
       if (response.error) {
         showError(resultContent, response.error);
       } else {
-        resultContent.innerHTML = formatResult(response.result);
+        currentAiResult = response.result;
+        resultContent.innerHTML = formatResult(response.result, feature);
       }
     } catch (err) {
       if (activeFeature !== feature) return;
@@ -227,14 +269,26 @@
     }
   }
 
-  function formatResult(text) {
+  function escapeHtml(unsafe) {
+    return (unsafe || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  }
+
+  function formatResult(text, feature) {
     if (!text) return '<em>No result</em>';
-    return text
+    let html = text
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
       .replace(/^• /gm, '‣ ')
-      .replace(/^- /gm, '‣ ')
-      .replace(/\n/g, '<br>');
+      .replace(/^- /gm, '‣ ');
+
+    if (['phrase', 'idea', 'sentence'].includes(feature)) {
+      html = html.replace(/^(?:<strong>)?(\d+\.)\s*(?:<strong>)?(.+?)(?:<\/strong>)?$/gm, (match, number, phrase) => {
+        const cleanPhrase = phrase.replace(/<[^>]+>/g, '').trim();
+        return `<strong>${number} ${phrase}</strong><button class="ll-inline-save-btn" data-word="${escapeHtml(cleanPhrase)}" title="Save exactly this item to Vocabulary">${ICONS.save} Save</button>`;
+      });
+    }
+
+    return html.replace(/\n/g, '<br>');
   }
 
   function showError(container, message) {

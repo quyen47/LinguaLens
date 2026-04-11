@@ -562,6 +562,59 @@ Text: "{text}"`
         showToast('Word deleted from vocabulary');
       });
     });
+
+    // Bind item click to open sidebar
+    $$('.vocab-item').forEach(itemEl => {
+      itemEl.addEventListener('click', (e) => {
+        // Ignore clicks on delete button or links
+        if (e.target.closest('.vocab-delete-btn') || e.target.closest('a')) return;
+        
+        const id = itemEl.dataset.vocabId;
+        const item = vocabulary.find(v => v.id === id);
+        if (!item) return;
+
+        $('#vs-word').textContent = item.word;
+        
+        let metaHtml = '';
+        if (item.url) metaHtml += `<div class="vs-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg> <a href="${escapeHtml(item.url)}" target="_blank">${escapeHtml(item.title || item.url)}</a></div>`;
+        metaHtml += `<div class="vs-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> ${formatDate(item.createdAt)}</div>`;
+        
+        $('#vs-meta').innerHTML = metaHtml;
+        
+        let rawContext = (item.context || '').trim();
+        const firstLineBreak = rawContext.indexOf('\n');
+        
+        if (firstLineBreak !== -1) {
+          const firstLine = rawContext.substring(0, firstLineBreak).trim();
+          const cleanWord = item.word.replace(/\s*\([^)]*\)$/, '').toLowerCase();
+          
+          // Remove first line if it's a numbered header or just repeats the word
+          if (/^(?:\*\*?)?\d+\..*?$/.test(firstLine) || firstLine.toLowerCase().includes(cleanWord)) {
+            rawContext = rawContext.substring(firstLineBreak).trim();
+          }
+        }
+
+        // Simple markdown formatter
+        let formattedContext = escapeHtml(rawContext)
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.+?)\*/g, '<em>$1</em>')
+          .replace(/^• /gm, '‣ ')
+          .replace(/^- /gm, '‣ ')
+          .replace(/\n/g, '<br>');
+          
+        $('#vs-context').innerHTML = formattedContext;
+        
+        $('#vocab-details-sidebar').classList.add('visible');
+      });
+    });
+
+    // Bind sidebar close
+    const vsClose = $('#vs-close');
+    if (vsClose) {
+      vsClose.addEventListener('click', () => {
+        $('#vocab-details-sidebar').classList.remove('visible');
+      });
+    }
   }
 
   function bindVocabularyActions() {

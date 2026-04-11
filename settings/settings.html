@@ -174,10 +174,23 @@
         <div class="vocab-list" id="vocab-list">
           <!-- Populated by JS -->
         </div>
-        <div class="vocab-empty" id="vocab-empty">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-          <p>No vocabulary saved yet.</p>
-          <span>Select text on any webpage and click "Save Vocab" to start building your vocabulary.</span>
+          <div class="vocab-empty" id="vocab-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+            <p>Your vocabulary list is empty.</p>
+            <span style="font-size: 13px; color: var(--ll-text-dim);">Save words and phrases from any webpage using the LinguaLens popup.</span>
+          </div>
+        </div>
+
+        <!-- Vocabulary Details Sidebar -->
+        <div class="vocab-details-sidebar" id="vocab-details-sidebar">
+          <div class="vs-header">
+            <h3 class="vs-title" id="vs-word">Word</h3>
+            <button class="vs-close-btn" id="vs-close" title="Close">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+          <div class="vs-meta" id="vs-meta"></div>
+          <div class="vs-content" id="vs-context"></div>
         </div>
       </section>
 
