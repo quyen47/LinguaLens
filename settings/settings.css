@@ -1049,3 +1049,202 @@ html, body {
     width: 100%;
   }
 }
+
+/* ---- Practice Mode ---- */
+.practice-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.practice-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.practice-panel {
+  width: 600px;
+  max-width: 95vw;
+  max-height: 85vh;
+  background: var(--surface-solid);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateY(20px) scale(0.97);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.practice-overlay.visible .practice-panel {
+  transform: translateY(0) scale(1);
+}
+
+.practice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.practice-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.practice-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.practice-score {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dim);
+  background: var(--surface);
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.practice-score-correct {
+  color: var(--success);
+}
+
+.practice-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.practice-mode-select {
+  width: auto;
+  padding: 6px 32px 6px 12px;
+  font-size: 12px;
+}
+
+.practice-body {
+  padding: 32px 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.practice-empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 40px 0;
+}
+
+.practice-empty p {
+  font-size: 15px;
+}
+
+.practice-progress {
+  width: 100%;
+  height: 4px;
+  background: var(--surface);
+  border-radius: 2px;
+  margin-bottom: 28px;
+  overflow: hidden;
+}
+
+.practice-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  border-radius: 2px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+
+.practice-prompt {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  margin-bottom: 10px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.practice-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: 28px;
+  font-style: italic;
+}
+
+.practice-input-wrap {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.practice-input {
+  flex: 1;
+  font-size: 16px;
+  padding: 12px 16px;
+  text-align: center;
+}
+
+.practice-feedback {
+  text-align: center;
+  font-size: 15px;
+  min-height: 28px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  word-break: break-word;
+}
+
+.practice-feedback.correct {
+  color: var(--success);
+}
+
+.practice-feedback.wrong {
+  color: var(--error);
+}
+
+.practice-next-btn {
+  display: block;
+  margin: 20px auto 0;
+}
+
+.practice-results {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.practice-results-icon {
+  font-size: 56px;
+  margin-bottom: 16px;
+}
+
+.practice-results h3 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 10px;
+}
+
+.practice-results p {
+  font-size: 15px;
+  color: var(--text-dim);
+  margin-bottom: 24px;
+}

@@ -15,7 +15,8 @@
     { id: 'grammar', name: 'Grammar', emoji: '📝' },
     { id: 'summary', name: 'Summaries', emoji: '📋' },
     { id: 'idea', name: 'Detect Idea Template', emoji: '💭' },
-    { id: 'sentence', name: 'Detect Sentence Template', emoji: '🔤' }
+    { id: 'sentence', name: 'Detect Sentence Template', emoji: '🔤' },
+    { id: 'rootvocab', name: 'Root Vocab', emoji: '🌱' }
   ];
 
   // ---- Default prompts (mirrored from service worker) ----
@@ -117,6 +118,39 @@ Text: "{text}"`,
 **Similar examples:**
 1. [example using the same template]
 2. [another example]
+
+Text: "{text}"`
+  ,
+
+    rootvocab: `Analyze the word/phrase and break it down to its roots, prefixes, and suffixes. Respond in {targetLang}.
+
+Format your response exactly like this:
+
+**Level:** [estimate CEFR level: A1/A2/B1/B2/C1/C2] – Word: {text}
+
+⸻
+
+**Root Breakdown:** {text} = [prefix-] + [root] + [-suffix] (break it into meaningful morphemes)
+
+**Explanation:**
+• [prefix] = [meaning]
+• [root] = [meaning]
+• [suffix] = [meaning if applicable]
+👉 [How the parts combine to form the final meaning]
+
+**Meaning:** [clear definition in {targetLang}]
+
+⸻
+
+**Example:**
+• [1 example sentence using the word naturally]
+
+⸻
+
+**✅ Common Collocations + Examples:**
+• [collocation 1] → [example sentence]
+• [collocation 2] → [example sentence]
+• [collocation 3] → [example sentence]
 
 Text: "{text}"`
   };
@@ -662,6 +696,210 @@ Text: "{text}"`
         showToast('All vocabulary cleared');
       }
     });
+
+    // Practice button
+    $('#btn-practice-vocab').addEventListener('click', () => {
+      if (vocabulary.length < 3) {
+        showToast('Need at least 3 vocabulary items to practice', 'error');
+        return;
+      }
+      startPractice();
+    });
+  }
+
+  // ---- Practice Mode ----
+  let practiceState = null;
+
+  function startPractice() {
+    const mode = $('#practice-mode').value;
+    const shuffled = [...vocabulary]
+      .filter(v => v.word && v.context)
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 10); // max 10 per session
+
+    if (shuffled.length < 3) {
+      showToast('Not enough vocabulary with context to practice', 'error');
+      return;
+    }
+
+    practiceState = {
+      mode,
+      items: shuffled,
+      currentIndex: 0,
+      correct: 0,
+      total: shuffled.length,
+      answered: false
+    };
+
+    const overlay = $('#practice-overlay');
+    overlay.classList.add('visible');
+
+    $('#practice-empty').style.display = 'none';
+    $('#practice-card').style.display = 'block';
+    $('#practice-results').style.display = 'none';
+    $('#p-correct').textContent = '0';
+    $('#p-total').textContent = practiceState.total;
+
+    showPracticeCard();
+    bindPracticeEvents();
+  }
+
+  function bindPracticeEvents() {
+    const submitBtn = $('#practice-submit');
+    const nextBtn = $('#practice-next');
+    const closeBtn = $('#practice-close');
+    const restartBtn = $('#practice-restart');
+    const inputEl = $('#practice-input');
+    const modeSelect = $('#practice-mode');
+
+    // Remove old listeners by cloning
+    const newSubmit = submitBtn.cloneNode(true);
+    submitBtn.parentNode.replaceChild(newSubmit, submitBtn);
+    const newNext = nextBtn.cloneNode(true);
+    nextBtn.parentNode.replaceChild(newNext, nextBtn);
+    const newClose = closeBtn.cloneNode(true);
+    closeBtn.parentNode.replaceChild(newClose, closeBtn);
+    const newRestart = restartBtn.cloneNode(true);
+    restartBtn.parentNode.replaceChild(newRestart, restartBtn);
+
+    newSubmit.addEventListener('click', checkPracticeAnswer);
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        if (practiceState.answered) {
+          advancePractice();
+        } else {
+          checkPracticeAnswer();
+        }
+      }
+    });
+    newNext.addEventListener('click', advancePractice);
+    newClose.addEventListener('click', () => {
+      $('#practice-overlay').classList.remove('visible');
+      practiceState = null;
+    });
+    newRestart.addEventListener('click', startPractice);
+    modeSelect.addEventListener('change', () => {
+      if (practiceState) startPractice();
+    });
+  }
+
+  function showPracticeCard() {
+    if (!practiceState) return;
+    const item = practiceState.items[practiceState.currentIndex];
+    const mode = practiceState.mode;
+    practiceState.answered = false;
+
+    const progressPct = ((practiceState.currentIndex) / practiceState.total) * 100;
+    $('#practice-progress-bar').style.width = progressPct + '%';
+
+    const cleanWord = item.word.replace(/\s*\([^)]*\)$/, '');
+
+    if (mode === 'word') {
+      // Show context/meaning, user types the word
+      let contextDisplay = (item.context || '').trim();
+      // Remove the word itself from context for hint
+      const wordRegex = new RegExp(cleanWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+      contextDisplay = contextDisplay.replace(wordRegex, '______');
+      // Truncate
+      if (contextDisplay.length > 200) contextDisplay = contextDisplay.substring(0, 200) + '...';
+
+      $('#practice-prompt').innerHTML = `<span style="color:var(--text-dim);font-size:14px;">What word fits this description?</span><br>${escapeHtml(contextDisplay).replace(/______/g, '<strong style="color:var(--primary)">______</strong>').replace(/\n/g, '<br>')}`;
+      $('#practice-hint').textContent = `Hint: ${cleanWord.length} letters, starts with "${cleanWord.charAt(0)}"`;
+    } else {
+      // Show word, user types meaning
+      $('#practice-prompt').innerHTML = `<span style="color:var(--text-dim);font-size:14px;">What does this word mean?</span><br><span style="color:var(--primary);font-size:24px">${escapeHtml(cleanWord)}</span>`;
+      $('#practice-hint').textContent = 'Type the meaning or definition';
+    }
+
+    $('#practice-input').value = '';
+    $('#practice-feedback').textContent = '';
+    $('#practice-feedback').className = 'practice-feedback';
+    $('#practice-next').style.display = 'none';
+    $('#practice-input').focus();
+  }
+
+  function checkPracticeAnswer() {
+    if (!practiceState || practiceState.answered) return;
+    const item = practiceState.items[practiceState.currentIndex];
+    const mode = practiceState.mode;
+    const userAnswer = $('#practice-input').value.trim().toLowerCase();
+
+    if (!userAnswer) return;
+
+    practiceState.answered = true;
+    const cleanWord = item.word.replace(/\s*\([^)]*\)$/, '').toLowerCase();
+    const feedback = $('#practice-feedback');
+
+    if (mode === 'word') {
+      // Check if user typed the word correctly
+      const isCorrect = userAnswer === cleanWord ||
+        cleanWord.includes(userAnswer) ||
+        levenshtein(userAnswer, cleanWord) <= Math.max(1, Math.floor(cleanWord.length * 0.25));
+
+      if (isCorrect) {
+        practiceState.correct++;
+        feedback.className = 'practice-feedback correct';
+        feedback.innerHTML = `✅ Correct! The word is <strong>${escapeHtml(item.word.replace(/\s*\([^)]*\)$/, ''))}</strong>`;
+      } else {
+        feedback.className = 'practice-feedback wrong';
+        feedback.innerHTML = `❌ Not quite. The correct word is <strong>${escapeHtml(item.word.replace(/\s*\([^)]*\)$/, ''))}</strong>`;
+      }
+    } else {
+      // For meaning mode, always show as "reviewed" since meaning can be expressed many ways
+      practiceState.correct++;
+      let contextSnippet = (item.context || '').trim();
+      // Extract first meaningful line
+      const lines = contextSnippet.split('\n').filter(l => l.trim());
+      const meaningLine = lines.find(l => /meaning|definit|nghĩa/i.test(l)) || lines[0] || '';
+      const shortMeaning = meaningLine.substring(0, 150);
+
+      feedback.className = 'practice-feedback correct';
+      feedback.innerHTML = `✅ Reviewed! <br><span style="font-size:13px;color:var(--text-dim)">${escapeHtml(shortMeaning)}</span>`;
+    }
+
+    $('#p-correct').textContent = practiceState.correct;
+    $('#practice-next').style.display = '';
+    $('#practice-input').blur();
+  }
+
+  function advancePractice() {
+    if (!practiceState) return;
+    practiceState.currentIndex++;
+    if (practiceState.currentIndex >= practiceState.total) {
+      showPracticeResults();
+    } else {
+      showPracticeCard();
+    }
+  }
+
+  function showPracticeResults() {
+    $('#practice-card').style.display = 'none';
+    $('#practice-results').style.display = 'block';
+    const pct = Math.round((practiceState.correct / practiceState.total) * 100);
+    let emoji = pct >= 80 ? '🌟' : pct >= 50 ? '👍' : '💪';
+    $('#practice-results-text').innerHTML = `You got <strong>${practiceState.correct}</strong> out of <strong>${practiceState.total}</strong> correct (${pct}%) ${emoji}`;
+    $('#practice-progress-bar').style.width = '100%';
+  }
+
+  // Simple Levenshtein distance for fuzzy matching
+  function levenshtein(a, b) {
+    const matrix = [];
+    for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+    for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+    for (let i = 1; i <= b.length; i++) {
+      for (let j = 1; j <= a.length; j++) {
+        if (b.charAt(i - 1) === a.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j] + 1
+          );
+        }
+      }
+    }
+    return matrix[b.length][a.length];
   }
 
   // ---- Utilities ----

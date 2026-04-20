@@ -152,6 +152,10 @@
               <p class="section-desc">Words and phrases you've saved while browsing. <span id="vocab-count">0</span> items.</p>
             </div>
             <div class="section-header-actions">
+              <button class="btn btn-primary btn-sm" id="btn-practice-vocab">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Practice
+              </button>
               <button class="btn btn-secondary btn-sm" id="btn-export-vocab">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export JSON
@@ -236,6 +240,60 @@
       </section>
 
     </main>
+  </div>
+  <!-- Practice Mode Overlay -->
+  <div class="practice-overlay" id="practice-overlay">
+    <div class="practice-panel">
+      <div class="practice-header">
+        <div class="practice-header-left">
+          <h2 class="practice-title">🧠 Vocabulary Practice</h2>
+          <div class="practice-score" id="practice-score">
+            <span class="practice-score-correct" id="p-correct">0</span> /
+            <span class="practice-score-total" id="p-total">0</span>
+          </div>
+        </div>
+        <div class="practice-header-right">
+          <select class="form-select practice-mode-select" id="practice-mode">
+            <option value="word">Type the word</option>
+            <option value="meaning">Type the meaning</option>
+          </select>
+          <button class="btn btn-secondary btn-sm" id="practice-close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Close
+          </button>
+        </div>
+      </div>
+
+      <div class="practice-body">
+        <!-- Empty state -->
+        <div class="practice-empty" id="practice-empty">
+          <p>You need at least 3 vocabulary items to start practicing.</p>
+        </div>
+
+        <!-- Card area -->
+        <div class="practice-card" id="practice-card" style="display:none">
+          <div class="practice-progress">
+            <div class="practice-progress-bar" id="practice-progress-bar"></div>
+          </div>
+          <div class="practice-prompt" id="practice-prompt"></div>
+          <div class="practice-hint" id="practice-hint"></div>
+          <div class="practice-input-wrap">
+            <input type="text" class="form-input practice-input" id="practice-input" placeholder="Type your answer..." autocomplete="off">
+            <button class="btn btn-primary" id="practice-submit">Check</button>
+          </div>
+          <div class="practice-feedback" id="practice-feedback"></div>
+          <button class="btn btn-secondary practice-next-btn" id="practice-next" style="display:none">Next →</button>
+        </div>
+
+        <!-- Results -->
+        <div class="practice-results" id="practice-results" style="display:none">
+          <div class="practice-results-icon">🎉</div>
+          <h3>Session Complete!</h3>
+          <p id="practice-results-text"></p>
+          <button class="btn btn-primary" id="practice-restart">Practice Again</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="settings.js"></script>

@@ -21,6 +21,7 @@
     summary: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>',
     idea: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>',
     sentence: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h10"/><path d="M4 18h14"/><circle cx="20" cy="12" r="2"/></svg>',
+    rootvocab: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22l4-4"/><path d="M9 13l-3 3"/><path d="M12 2a4 4 0 0 1 4 4c0 2-2 4-4 6-2-2-4-4-4-6a4 4 0 0 1 4-4z"/><circle cx="12" cy="6" r="1"/><path d="M12 12v4"/><path d="M12 16l4 4"/><path d="M12 16l-4 4"/></svg>',
     save: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>',
     settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
     close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
@@ -39,6 +40,7 @@
     { id: 'summary', label: 'Summaries', icon: ICONS.summary },
     { id: 'idea', label: 'Idea Template', icon: ICONS.idea },
     { id: 'sentence', label: 'Sentence Tpl', icon: ICONS.sentence },
+    { id: 'rootvocab', label: 'Root Vocab', icon: ICONS.rootvocab },
     { id: 'save', label: 'Save Vocab', icon: ICONS.save }
   ];
 
@@ -62,7 +64,9 @@
 
   // ---- Cache Settings ----
   function updateSettingsCache() {
+    if (!chrome.runtime?.id) return;
     chrome.runtime.sendMessage({ type: 'GET_SETTINGS' }, (response) => {
+      if (chrome.runtime.lastError) return;
       if (response) {
         currentSettings = response;
         currentTargetLang = response.targetLang || 'English';
@@ -70,7 +74,11 @@
     });
   }
   updateSettingsCache();
-  chrome.storage.onChanged.addListener(() => updateSettingsCache());
+  if (chrome.storage?.onChanged) {
+    chrome.storage.onChanged.addListener(() => {
+      if (chrome.runtime?.id) updateSettingsCache();
+    });
+  }
 
   // ---- Create Shadow DOM Host ----
   function createHost() {
@@ -82,6 +90,7 @@
 
     // Load styles
     const styleEl = document.createElement('style');
+    if (!chrome.runtime?.id) return;
     fetch(chrome.runtime.getURL('content/content.css'))
       .then(r => r.text())
       .then(css => {
@@ -311,6 +320,11 @@
       
       btn.innerHTML = ICONS.check + ' Saving...';
       
+      if (!chrome.runtime?.id) {
+        btn.innerHTML = ICONS.warning + ' Reload Page';
+        return;
+      }
+
       chrome.runtime.sendMessage({
         type: 'SAVE_VOCABULARY',
         data: {
@@ -343,6 +357,11 @@
         const word = inlineBtn.dataset.word;
         const targetBlock = blockSplit.find(b => b.includes(word));
         if (targetBlock) specificContext = targetBlock.trim();
+
+        if (!chrome.runtime?.id) {
+          inlineBtn.innerHTML = ICONS.warning + ' Reload';
+          return;
+        }
 
         chrome.runtime.sendMessage({
           type: 'SAVE_VOCABULARY',
@@ -456,6 +475,12 @@
         <span class="ll-loading-text">Analyzing with AI...</span>
       </div>
     `;
+    currentTargetLang = currentSettings?.targetLang || 'English';
+    
+    if (!chrome.runtime?.id) {
+      showError(resultContent, 'Extension context invalidated. Please refresh the page.');
+      return;
+    }
 
     try {
       const response = await new Promise((resolve, reject) => {
@@ -465,11 +490,8 @@
           text: selectedText,
           targetLang: currentTargetLang
         }, (res) => {
-          if (chrome.runtime.lastError) {
-            reject(new Error(chrome.runtime.lastError.message));
-          } else {
-            resolve(res);
-          }
+          if (chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError.message));
+          else resolve(res);
         });
       });
 
@@ -527,6 +549,7 @@
       if (link) {
         link.addEventListener('click', (e) => {
           e.stopPropagation();
+          if (!chrome.runtime?.id) return;
           chrome.runtime.sendMessage({ type: 'OPEN_SETTINGS' });
         });
       }
@@ -571,6 +594,10 @@
       e.preventDefault();
       hideTriggerIcon();
       if (targetMode === 'browser_sidebar') {
+        if (!chrome.runtime?.id) {
+          alert('LinguaLens has updated. Please refresh the page to continue using the sidebar.');
+          return;
+        }
         chrome.runtime.sendMessage({ 
           type: 'OPEN_BROWSER_SIDEBAR', 
           text: selectedText,
@@ -599,16 +626,41 @@
     }
   }
 
+  // ---- Context Invalidation Guard ----
+  // When the extension reloads, the old content script keeps running.
+  // We detect this and cleanly remove all listeners to prevent errors.
+  let contextAlive = true;
+
+  function isContextValid() {
+    try {
+      return !!(chrome.runtime?.id);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function selfDestruct() {
+    contextAlive = false;
+    clearTimeout(selectionTimeout);
+    document.removeEventListener('mouseup', onMouseUp);
+    document.removeEventListener('mousedown', onMouseDown);
+    document.removeEventListener('keydown', onKeyDown);
+    window.removeEventListener('scroll', onScroll);
+    if (hostEl) hostEl.remove();
+    hostEl = null;
+  }
+
   // ---- Selection Detection ----
   let selectionTimeout = null;
 
-  document.addEventListener('mouseup', (e) => {
-    // Don't trigger if clicking inside the popup or icon
+  function onMouseUp(e) {
+    if (!contextAlive || !isContextValid()) { selfDestruct(); return; }
     if (hostEl && hostEl.contains(e.target)) return;
     
-    // Small delay to let selection finalize
     clearTimeout(selectionTimeout);
     selectionTimeout = setTimeout(() => {
+      if (!contextAlive || !isContextValid()) { selfDestruct(); return; }
+
       const selection = window.getSelection();
       const text = selection?.toString().trim();
       
@@ -636,39 +688,48 @@
         hideTriggerIcon();
       }
     }, 150);
-  });
+  }
 
   // ---- Click Outside to Close ----
-  document.addEventListener('mousedown', (e) => {
+  function onMouseDown(e) {
+    if (!contextAlive || !isContextValid()) { selfDestruct(); return; }
     if (!isVisible) return;
-    
-    // Check if click is inside our shadow host
     if (hostEl && hostEl.contains(e.target)) return;
-    
-    // Check if click is inside shadow DOM
     const path = e.composedPath();
     if (path.some(el => el === hostEl)) return;
-    
     hidePopup();
-  });
+  }
 
   // ---- Escape to Close ----
-  document.addEventListener('keydown', (e) => {
+  function onKeyDown(e) {
+    if (!contextAlive || !isContextValid()) { selfDestruct(); return; }
     if (e.key === 'Escape') {
       if (isVisible) hidePopup();
       hideTriggerIcon();
     }
-  });
+  }
 
   // ---- Scroll to Reposition (or hide) ----
   let scrollTimeout = null;
-  window.addEventListener('scroll', () => {
+  function onScroll() {
+    if (!contextAlive || !isContextValid()) { selfDestruct(); return; }
     hideTriggerIcon();
     if (!isVisible) return;
     clearTimeout(scrollTimeout);
-    scrollTimeout = setTimeout(() => {
-      hidePopup();
-    }, 100);
-  }, { passive: true });
+    scrollTimeout = setTimeout(() => hidePopup(), 100);
+  }
+
+  document.addEventListener('mouseup', onMouseUp);
+  document.addEventListener('mousedown', onMouseDown);
+  document.addEventListener('keydown', onKeyDown);
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  // Poll periodically to detect invalidation proactively
+  const contextCheckInterval = setInterval(() => {
+    if (!isContextValid()) {
+      clearInterval(contextCheckInterval);
+      selfDestruct();
+    }
+  }, 2000);
 
 })();

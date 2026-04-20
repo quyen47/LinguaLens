@@ -104,6 +104,39 @@ Text: "{text}"`,
 2. [another example]
 
 Text: "{text}"`
+,
+
+  rootvocab: `Analyze the word/phrase and break it down to its roots, prefixes, and suffixes. Respond in {targetLang}.
+
+Format your response exactly like this:
+
+**Level:** [estimate CEFR level: A1/A2/B1/B2/C1/C2] – Word: {text}
+
+⸻
+
+**Root Breakdown:** {text} = [prefix-] + [root] + [-suffix] (break it into meaningful morphemes)
+
+**Explanation:**
+• [prefix] = [meaning]
+• [root] = [meaning]
+• [suffix] = [meaning if applicable]
+👉 [How the parts combine to form the final meaning]
+
+**Meaning:** [clear definition in {targetLang}]
+
+⸻
+
+**Example:**
+• [1 example sentence using the word naturally]
+
+⸻
+
+**✅ Common Collocations + Examples:**
+• [collocation 1] → [example sentence]
+• [collocation 2] → [example sentence]
+• [collocation 3] → [example sentence]
+
+Text: "{text}"`
 };
 
 // ---- Default Settings ----

@@ -12,6 +12,7 @@
     summary: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>',
     idea: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>',
     sentence: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h10"/><path d="M4 18h14"/><circle cx="20" cy="12" r="2"/></svg>',
+    rootvocab: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22l4-4"/><path d="M9 13l-3 3"/><path d="M12 2a4 4 0 0 1 4 4c0 2-2 4-4 6-2-2-4-4-4-6a4 4 0 0 1 4-4z"/><circle cx="12" cy="6" r="1"/><path d="M12 12v4"/><path d="M12 16l4 4"/><path d="M12 16l-4 4"/></svg>',
     save: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>',
     settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
     check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
@@ -27,6 +28,7 @@
     { id: 'summary', label: 'Summaries', icon: ICONS.summary },
     { id: 'idea', label: 'Idea Template', icon: ICONS.idea },
     { id: 'sentence', label: 'Sentence Tpl', icon: ICONS.sentence },
+    { id: 'rootvocab', label: 'Root Vocab', icon: ICONS.rootvocab },
     { id: 'save', label: 'Save Vocab', icon: ICONS.save }
   ];
 
@@ -147,6 +149,11 @@
         const word = inlineBtn.dataset.word;
         const targetBlock = blockSplit.find(b => b.includes(word));
         if (targetBlock) specificContext = targetBlock.trim();
+        
+        if (!chrome.runtime?.id) {
+          inlineBtn.innerHTML = ICONS.warning + ' Reload';
+          return;
+        }
 
         chrome.runtime.sendMessage({
           type: 'SAVE_VOCABULARY',
@@ -242,6 +249,11 @@
 
     resultContent.innerHTML = '<div class="ll-loading"><div class="ll-loading-dots"><span class="ll-loading-dot"></span><span class="ll-loading-dot"></span><span class="ll-loading-dot"></span></div><span class="ll-loading-text">Analyzing with AI...</span></div>';
 
+    if (!chrome.runtime?.id) {
+      showError(resultContent, 'Extension context invalidated. Please reload the sidebar.');
+      return;
+    }
+
     try {
       const response = await new Promise((resolve, reject) => {
         chrome.runtime.sendMessage({
@@ -306,11 +318,16 @@
 
   // Initialization
   async function init() {
+    if (!chrome.runtime?.id) return;
+
     // Get target lang
     chrome.storage.sync.get('targetLang', (settings) => {
+      if (chrome.runtime.lastError) return;
       if (settings.targetLang) currentTargetLang = settings.targetLang;
+      
       // Get initial data
       chrome.storage.session.get(null, (data) => {
+        if (chrome.runtime.lastError) return;
         if (data.panelSelectedText) {
           panelData.text = data.panelSelectedText;
           panelData.context = data.panelContext || '';
@@ -323,18 +340,22 @@
   }
 
   // Listen for updates from content script
-  chrome.storage.session.onChanged.addListener((changes) => {
-    if (changes.panelSelectedText) {
-      panelData.text = changes.panelSelectedText.newValue || '';
-    }
-    if (changes.panelContext) panelData.context = changes.panelContext.newValue || '';
-    if (changes.panelUrl) panelData.url = changes.panelUrl.newValue || '';
-    if (changes.panelTitle) panelData.title = changes.panelTitle.newValue || '';
-    
-    if (changes.panelSelectedText && panelData.text) {
-      buildPopup();
-    }
-  });
+  if (chrome.storage?.session?.onChanged) {
+    chrome.storage.session.onChanged.addListener((changes) => {
+      if (!chrome.runtime?.id) return;
+      
+      if (changes.panelSelectedText) {
+        panelData.text = changes.panelSelectedText.newValue || '';
+      }
+      if (changes.panelContext) panelData.context = changes.panelContext.newValue || '';
+      if (changes.panelUrl) panelData.url = changes.panelUrl.newValue || '';
+      if (changes.panelTitle) panelData.title = changes.panelTitle.newValue || '';
+      
+      if (changes.panelSelectedText && panelData.text) {
+        buildPopup();
+      }
+    });
+  }
 
   init();
 
